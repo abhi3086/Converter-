@@ -1,0 +1,27 @@
+
+import telegram
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+import requests
+from bs4 import BeautifulSoup
+
+def start(update, context):
+    update.message.reply_text('Welcome to the Terabox to Pdisk link converter bot! Send me a Terabox link to convert it to a Pdisk link.')
+
+def convert_link(update, context):
+    terabox_link = update.message.text
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+    response = requests.get(terabox_link, headers=headers)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    pdisk_link = soup.find('a', {'class': 'btn btn-primary btn-lg btn-block'}).get('href')
+    update.message.reply_text(pdisk_link)
+
+def main():
+    updater = Updater('6131956743:AAF27dJ7fAwwsQTjnzCwtIDUSNKUtQkGECU', use_context=True)
+    dp = updater.dispatcher
+    dp.add_handler(CommandHandler('start', start))
+    dp.add_handler(MessageHandler(Filters.text, convert_link))
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
